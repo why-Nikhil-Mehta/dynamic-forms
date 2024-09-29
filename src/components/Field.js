@@ -1,4 +1,3 @@
-// components/Fields.js
 import React from 'react';
 
 export const TextInput = ({ field, value, handleChange, errorMessage }) => (
