@@ -2,28 +2,28 @@ import React from 'react';
 
 export const TextInput = ({ field, value, handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label} <span className='mandatory'>{field.required && '  *'}</span></label>
+    <label style={{ paddingBottom: "10px" }}>{field.label} <span className='mandatory'>{field.required && '  *'}</span></label>
     <input
       type="text"
       name={field.name}
       placeholder={field.placeholder || field.default || ''}
       value={value || field.default || ''}
       onChange={handleChange}
-    // required={field.required}
+      required={field.required}
     />
-    {errorMessage && <p className="error-message">{errorMessage}</p>}
+    {field.errorMessage && <p className="error-message">{field.errorMessage}</p>}
   </div>
 );
 
 export const TextArea = ({ field, value, handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label}<span className='mandatory'>{field.required && '  *'}</span></label>
+    <label style={{ paddingBottom: "10px" }}>{field.label}<span className='mandatory'>{field.required && '  *'}</span></label>
     <textarea
       name={field.name}
       placeholder={field.placeholder || field.default || ''}
       value={value || field.default || ''}
       onChange={handleChange}
-    // required={field.required}
+      required={field.required}
     />
     {field.errorMessage && <p className="error-message">{field.errorMessage}</p>}
   </div>
@@ -31,12 +31,12 @@ export const TextArea = ({ field, value, handleChange, errorMessage }) => (
 
 export const Dropdown = ({ field, value, handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label}<span className='mandatory'>{field.required && '  *'}</span></label>
+    <label style={{ paddingBottom: "10px" }}>{field.label}<span className='mandatory'>{field.required && '  *'}</span></label>
     <select
       name={field.name}
       value={value || field.default || ''}
       onChange={handleChange}
-    // required={field.required}
+      required={field.required}
     >
       <option value="" disabled>{field.placeholder || 'Select an option'}</option>
       {field.options.map((option, idx) => (
@@ -49,16 +49,17 @@ export const Dropdown = ({ field, value, handleChange, errorMessage }) => (
 
 export const RadioGroup = ({ field, value, handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label}{<span className='mandatory'>{field.required && '  *'}</span>}</label>
+    <label style={{ paddingBottom: "10px" }}>{field.label}{<span className='mandatory'>{field.required && '  *'}</span>}</label>
     {field.options.map((option, idx) => (
-      <label key={idx}>
+      <label style={{ padding: "5px 0px" }} key={idx}>
         <input
           type="radio"
           name={field.name}
           value={option.value}
           checked={value === option.value || field.default === option.value}
           onChange={handleChange}
-        // required={field.required}
+          required={field.required}
+          style={{ marginRight: "5px" }}
         />
         {option.label}
       </label>
@@ -69,15 +70,16 @@ export const RadioGroup = ({ field, value, handleChange, errorMessage }) => (
 
 export const CheckboxGroup = ({ field, value = [], handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label} <span className='mandatory'>{field.required && '  *'}</span></label>
+    <label style={{ paddingBottom: "10px" }}>{field.label} <span className='mandatory'>{field.required && '  *'}</span></label>
     {field.options.map((option, idx) => (
-      <label key={idx}>
+      <label style={{ padding: "5px 0px" }} key={idx}>
         <input
           type="checkbox"
           name={field.name}
           value={option.value}
           checked={value.includes(option.value)}
           onChange={handleChange}
+          style={{ marginRight: "5px" }}
         />
         {option.label}
       </label>
@@ -88,7 +90,7 @@ export const CheckboxGroup = ({ field, value = [], handleChange, errorMessage })
 
 export const Slider = ({ field, value, handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label} <span className='mandatory'>{field.required && '  *'}</span> </label>
+    <label style={{ paddingBottom: "10px" }}>{field.label} <span className='mandatory'>{field.required && '  *'}</span> </label>
     <input
       type="range"
       name={field.name}
@@ -97,6 +99,7 @@ export const Slider = ({ field, value, handleChange, errorMessage }) => (
       step={field.step}
       value={value || field.min}
       onChange={handleChange}
+      required={field.required}
     />
     <span>  {value || field.min} </span>
     {field.errorMessage && <p className="error-message">{field.errorMessage}</p>}
@@ -105,7 +108,7 @@ export const Slider = ({ field, value, handleChange, errorMessage }) => (
 
 export const NumberInput = ({ field, value, handleChange, errorMessage }) => (
   <div className="form-group">
-    <label>{field.label}<span className='mandatory'>{field.required && '  *'}</span></label>
+    <label style={{ paddingBottom: "10px" }}>{field.label}<span className='mandatory'>{field.required && '  *'}</span></label>
     <input
       type="number"
       name={field.name}
@@ -114,7 +117,7 @@ export const NumberInput = ({ field, value, handleChange, errorMessage }) => (
       max={field.max}
       value={value || field.default || ''}
       onChange={handleChange}
-    // required={field.required}
+      required={field.required}
     />
     {field.errorMessage && <p className="error-message">{field.errorMessage}</p>}
   </div>

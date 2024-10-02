@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { TextInput, TextArea, Dropdown, RadioGroup, CheckboxGroup, Slider, NumberInput } from './components/Field'; // Import NumberInput
+import renderField from './components/renderField';
 import './style.css'; // Import the enhanced CSS
 
 const DynamicForm = ({ jsonStructure }) => {
     const [formData, setFormData] = useState({});
-    const [errors, setErrors] = useState(false); // Track validation errors
+    const [errors, setErrors] = useState(false);
+    const [currentSectionIndex, setCurrentSectionIndex] = useState(0); // Track the current section
     const [savedData, setSavedData] = useState(null);
+
+    const totalSections = jsonStructure.form.groups.length; // Total number of sections
 
     useEffect(() => {
         const savedForm = localStorage.getItem('formData');
@@ -20,7 +23,6 @@ const DynamicForm = ({ jsonStructure }) => {
     // Initialize formData with default values from the JSON structure
     const initializeDefaultValues = () => {
         let initialData = {};
-
         jsonStructure.form.groups.forEach((group) => {
             group.fields.forEach((field) => {
                 if (field.default) {
@@ -28,11 +30,10 @@ const DynamicForm = ({ jsonStructure }) => {
                 }
             });
         });
-
         setFormData(initialData);
     };
 
-    // Common function for onChange handlings
+    // Handle input changes
     const handleChange = (e, field, isCheckboxGroup = false) => {
         const { name, value, type, checked } = e.target;
 
@@ -59,12 +60,14 @@ const DynamicForm = ({ jsonStructure }) => {
             setErrors(false)
         }
 
-    };
+        if (field.type === 'number' && field.name === 'graduationYear' && value) {
+            if (value < field.min || value > field.max) {
+                field.errorMessage = `Graduation year must be between ${field.min} and ${field.max}.`;
+            } else {
+                field.errorMessage = undefined;
+            }
+        }
 
-    // Created Custom Function on Top of common function for some field specific handlings
-    const handleTextChange = (e, field) => {
-        handleChange(e, field);
-        const { value } = e.target;
         // Email validation (if the field is for email)
         if (field.type === 'text' && field.name === 'email' && value) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -89,124 +92,62 @@ const DynamicForm = ({ jsonStructure }) => {
             }
         }
 
+    };
 
-    }
-
-    // Created Custom Function on Top of common function for some field specific handlings
-    const handleNumberChange = (e, field) => {
-        handleChange(e, field);
-        const { value } = e.target;
-        // Numeric validation (e.g., for year range)
-        if (field.type === 'number' && field.name === 'graduationYear' && value) {
-            if (value < field.min || value > field.max) {
-                field.errorMessage = `Graduation year must be between ${field.min} and ${field.max}.`;
-            } else {
-                field.errorMessage = undefined;
-            }
+    // Handle section navigation
+    const handleNext = () => {
+        if (!errors) {
+            localStorage.setItem('formData', JSON.stringify(formData));
+            setCurrentSectionIndex(currentSectionIndex + 1); // Move to next section
         }
+    };
 
+    const handleBack = () => {
+        setCurrentSectionIndex(currentSectionIndex - 1); // Move to previous section
+    };
 
-    }
-
-
+    // Handle form submission (last step)
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!errors) {
             localStorage.setItem('formData', JSON.stringify(formData));
-            alert('Form data saved successfully!');
-        } else {
-            alert('Please correct the errors before submitting.');
+            alert('Form submitted successfully!');
         }
     };
 
-    const renderField = (field, value) => {
-
-        switch (field.type) {
-            case 'text':
-                return (
-                    <TextInput
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleTextChange(e, field)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            case 'textarea':
-                return (
-                    <TextArea
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleChange(e, field)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            case 'dropdown':
-                return (
-                    <Dropdown
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleChange(e, field)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            case 'radio':
-                return (
-                    <RadioGroup
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleChange(e, field)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            case 'checkbox':
-                return (
-                    <CheckboxGroup
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleChange(e, field, true)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            case 'slider':
-                return (
-                    <Slider
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleChange(e, field)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            case 'number':
-                return (
-                    <NumberInput
-                        field={field}
-                        value={value}
-                        handleChange={(e) => handleNumberChange(e, field)}
-                        errorMessage={field.errorMessage}
-                    />
-                );
-            default:
-                return null;
-        }
-    };
+    const currentSection = jsonStructure.form.groups[currentSectionIndex]; // Get current section
 
     return (
         <div className="form-container">
-            <form onSubmit={handleSubmit}>
+            <form>
                 <h2>{jsonStructure.form.title}</h2>
                 <p>{jsonStructure.form.description}</p>
-                {jsonStructure.form.groups.map((group, groupIndex) => (
-                    <div key={groupIndex} className="form-group">
-                        <h3 className="group-title">{group.title}</h3>
-                        {group.fields.map((field, fieldIndex) => (
-                            <div key={fieldIndex}>
-                                {renderField(field, formData[field.name])}
-                            </div>
-                        ))}
-                        {groupIndex < jsonStructure.form.groups.length - 1 && <div className="group-divider"></div>}
-                    </div>
-                ))}
-                <button disabled={errors} className={errors ? "error" : "success"} type="submit">Save Form</button>
+
+                {/* Render the fields for the current section */}
+                <div className="form-group">
+                    <h3 className="group-title">{currentSection.title}</h3>
+                    {currentSection.fields.map((field, fieldIndex) => (
+                        <div key={fieldIndex}>
+                            {renderField(field, formData[field.name], handleChange, errors[field.name])}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Navigation buttons */}
+                <div className="form-navigation">
+                    {currentSectionIndex > 0 && (
+                        <button type="button" onClick={handleBack}>
+                            Back
+                        </button>
+                    )}
+                    {currentSectionIndex < totalSections - 1 ? (
+                        <button disabled={errors} type="button" onClick={handleNext}>
+                            Next
+                        </button>
+                    ) : (
+                        <button type="button" onClick={handleSubmit}>Submit</button>
+                    )}
+                </div>
             </form>
         </div>
     );
