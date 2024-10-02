@@ -103,7 +103,8 @@ const DynamicForm = ({ jsonStructure }) => {
     };
 
     const handleBack = () => {
-        setCurrentSectionIndex(currentSectionIndex - 1); // Move to previous section
+        if(!errors)
+            setCurrentSectionIndex(currentSectionIndex - 1); // Move to previous section
     };
 
     // Handle form submission (last step)
@@ -141,7 +142,7 @@ const DynamicForm = ({ jsonStructure }) => {
                         </button>
                     )}
                     {currentSectionIndex < totalSections - 1 ? (
-                        <button disabled={errors} type="button" onClick={handleNext}>
+                        <button  type="button" onClick={handleNext}>
                             Next
                         </button>
                     ) : (
